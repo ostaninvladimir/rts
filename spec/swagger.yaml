@@ -1,0 +1,1048 @@
+{
+  "openapi" : "3.0.3",
+  "info" : {
+    "title" : "Big Invest Mobile Notification API",
+    "description" : "OpenAPI-контракт для Notification Service мобильного приложения Big Invest.\nМаршруты соответствуют текущему стилю проекта:\n/api/v1/Notification/{Action}\n",
+    "version" : "1.0.0"
+  },
+  "servers" : [ {
+    "url" : "https://virtserver.swaggerhub.com/OSTANINBOB/notificationService/1.0.0",
+    "description" : "SwaggerHub API Auto Mocking"
+  }, {
+    "url" : "https://api.biginvest.example.com",
+    "description" : "Production (example)"
+  }, {
+    "url" : "https://stage-api.biginvest.example.com",
+    "description" : "Staging (example)"
+  } ],
+  "tags" : [ {
+    "name" : "Notification",
+    "description" : "Методы Notification Service"
+  } ],
+  "paths" : {
+    "/api/v1/Notification/UpsertDeviceToken" : {
+      "post" : {
+        "tags" : [ "Notification" ],
+        "summary" : "Регистрация/обновление push-токена устройства",
+        "operationId" : "upsertDeviceToken",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpsertDeviceTokenRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Токен устройства успешно сохранен",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SimpleResultResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "429" : {
+            "$ref" : "#/components/responses/TooManyRequests"
+          },
+          "500" : {
+            "$ref" : "#/components/responses/InternalError"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/Notification/DeactivateDeviceToken" : {
+      "post" : {
+        "tags" : [ "Notification" ],
+        "summary" : "Деактивация push-токена устройства",
+        "operationId" : "deactivateDeviceToken",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DeactivateDeviceTokenRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Токен устройства деактивирован",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SimpleResultResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          },
+          "429" : {
+            "$ref" : "#/components/responses/TooManyRequests"
+          },
+          "500" : {
+            "$ref" : "#/components/responses/InternalError"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/Notification/Send" : {
+      "post" : {
+        "tags" : [ "Notification" ],
+        "summary" : "Создание и отправка уведомления по каналам",
+        "description" : "Internal API. Поддерживает оба варианта авторизации:\n- Authorization: Bearer <service_token>\n- x-api-key: <service_api_key>\n",
+        "operationId" : "sendNotification",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SendNotificationRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Дубликат события (идемпотентный возврат)",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SendNotificationAcceptedResponse"
+                }
+              }
+            }
+          },
+          "202" : {
+            "description" : "Уведомление принято в обработку",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SendNotificationAcceptedResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "429" : {
+            "$ref" : "#/components/responses/TooManyRequests"
+          },
+          "500" : {
+            "$ref" : "#/components/responses/InternalError"
+          },
+          "502" : {
+            "$ref" : "#/components/responses/ProviderError"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        }, {
+          "apiKeyAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/Notification/GetFeed" : {
+      "get" : {
+        "tags" : [ "Notification" ],
+        "summary" : "Получение ленты уведомлений",
+        "operationId" : "getNotificationFeed",
+        "parameters" : [ {
+          "name" : "offset",
+          "in" : "query",
+          "description" : "Смещение для пагинации",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "minimum" : 0,
+            "type" : "integer",
+            "default" : 0
+          }
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "description" : "Размер страницы",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "maximum" : 100,
+            "minimum" : 1,
+            "type" : "integer",
+            "default" : 20
+          }
+        }, {
+          "name" : "unreadOnly",
+          "in" : "query",
+          "description" : "Возвращать только непрочитанные уведомления",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        }, {
+          "name" : "sort",
+          "in" : "query",
+          "description" : "Сортировка (whitelist: createdAt,asc|desc)",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string",
+            "example" : "createdAt,desc"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Лента уведомлений",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GetFeedResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "429" : {
+            "$ref" : "#/components/responses/TooManyRequests"
+          },
+          "500" : {
+            "$ref" : "#/components/responses/InternalError"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/Notification/GetUnreadCount" : {
+      "get" : {
+        "tags" : [ "Notification" ],
+        "summary" : "Получение количества непрочитанных уведомлений",
+        "operationId" : "getUnreadCount",
+        "responses" : {
+          "200" : {
+            "description" : "Количество непрочитанных",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GetUnreadCountResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "429" : {
+            "$ref" : "#/components/responses/TooManyRequests"
+          },
+          "500" : {
+            "$ref" : "#/components/responses/InternalError"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/Notification/MarkAsRead" : {
+      "post" : {
+        "tags" : [ "Notification" ],
+        "summary" : "Пометка уведомления прочитанным",
+        "operationId" : "markAsRead",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MarkAsReadRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Уведомление помечено прочитанным",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MarkAsReadResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          },
+          "429" : {
+            "$ref" : "#/components/responses/TooManyRequests"
+          },
+          "500" : {
+            "$ref" : "#/components/responses/InternalError"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/Notification/MarkAllAsRead" : {
+      "post" : {
+        "tags" : [ "Notification" ],
+        "summary" : "Пометка всех уведомлений пользователя прочитанными",
+        "operationId" : "markAllAsRead",
+        "responses" : {
+          "200" : {
+            "description" : "Все уведомления помечены прочитанными",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MarkAllAsReadResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "429" : {
+            "$ref" : "#/components/responses/TooManyRequests"
+          },
+          "500" : {
+            "$ref" : "#/components/responses/InternalError"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/Notification/GetPreferences" : {
+      "get" : {
+        "tags" : [ "Notification" ],
+        "summary" : "Получение настроек уведомлений",
+        "operationId" : "getNotificationPreferences",
+        "responses" : {
+          "200" : {
+            "description" : "Текущие настройки уведомлений",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NotificationPreferencesResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "429" : {
+            "$ref" : "#/components/responses/TooManyRequests"
+          },
+          "500" : {
+            "$ref" : "#/components/responses/InternalError"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/Notification/SetPreferences" : {
+      "post" : {
+        "tags" : [ "Notification" ],
+        "summary" : "Обновление настроек уведомлений",
+        "operationId" : "setNotificationPreferences",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SetNotificationPreferencesRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Настройки успешно обновлены",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SimpleResultResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "429" : {
+            "$ref" : "#/components/responses/TooManyRequests"
+          },
+          "500" : {
+            "$ref" : "#/components/responses/InternalError"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "PlatformEnum" : {
+        "type" : "string",
+        "enum" : [ "IOS", "ANDROID" ]
+      },
+      "ChannelEnum" : {
+        "type" : "string",
+        "enum" : [ "PUSH", "IN_APP", "SMS", "EMAIL", "WHATSAPP", "TELEGRAM" ]
+      },
+      "NotificationCategoryEnum" : {
+        "type" : "string",
+        "enum" : [ "marketing", "transactions", "system" ]
+      },
+      "NotificationStatusEnum" : {
+        "type" : "string",
+        "enum" : [ "CREATED", "QUEUED_QUIET_HOURS", "SENT", "FAILED", "READ" ]
+      },
+      "UpsertDeviceTokenRequest" : {
+        "required" : [ "deviceId", "platform", "pushToken" ],
+        "type" : "object",
+        "properties" : {
+          "deviceId" : {
+            "maxLength" : 128,
+            "minLength" : 1,
+            "type" : "string",
+            "example" : "d99f6f6a-2c4f-4e73-b2ac-8da2d8f58f11"
+          },
+          "platform" : {
+            "$ref" : "#/components/schemas/PlatformEnum"
+          },
+          "pushToken" : {
+            "maxLength" : 512,
+            "minLength" : 1,
+            "type" : "string",
+            "example" : "fcm_xxxxx"
+          },
+          "appVersion" : {
+            "maxLength" : 32,
+            "type" : "string",
+            "example" : "3.12.0"
+          },
+          "locale" : {
+            "maxLength" : 16,
+            "type" : "string",
+            "example" : "ru-KZ"
+          }
+        },
+        "additionalProperties" : false
+      },
+      "DeactivateDeviceTokenRequest" : {
+        "required" : [ "deviceId" ],
+        "type" : "object",
+        "properties" : {
+          "deviceId" : {
+            "maxLength" : 128,
+            "minLength" : 1,
+            "type" : "string",
+            "example" : "d99f6f6a-2c4f-4e73-b2ac-8da2d8f58f11"
+          }
+        },
+        "additionalProperties" : false
+      },
+      "NotificationRecipient" : {
+        "required" : [ "userId" ],
+        "type" : "object",
+        "properties" : {
+          "userId" : {
+            "type" : "string",
+            "format" : "uuid",
+            "example" : "1c3eac11-8dbf-4ff3-b448-37477044a6aa"
+          },
+          "phone" : {
+            "maxLength" : 32,
+            "type" : "string",
+            "example" : "77011234567"
+          },
+          "email" : {
+            "maxLength" : 254,
+            "type" : "string",
+            "format" : "email",
+            "example" : "user@example.com"
+          },
+          "telegramChatId" : {
+            "maxLength" : 64,
+            "type" : "string",
+            "example" : "123456789"
+          }
+        },
+        "additionalProperties" : false
+      },
+      "SendNotificationRequest" : {
+        "required" : [ "body", "category", "channels", "eventId", "recipient", "sourceSystem" ],
+        "type" : "object",
+        "properties" : {
+          "sourceSystem" : {
+            "maxLength" : 64,
+            "minLength" : 1,
+            "type" : "string",
+            "example" : "orders-service"
+          },
+          "eventId" : {
+            "maxLength" : 128,
+            "minLength" : 1,
+            "type" : "string",
+            "example" : "order-784512-status-changed-2026-02-10T10:20:11Z"
+          },
+          "recipient" : {
+            "$ref" : "#/components/schemas/NotificationRecipient"
+          },
+          "title" : {
+            "maxLength" : 255,
+            "type" : "string",
+            "example" : "Статус заявки обновлен"
+          },
+          "body" : {
+            "maxLength" : 4000,
+            "minLength" : 1,
+            "type" : "string",
+            "example" : "Заявка №784512 переведена в статус 'Одобрено'."
+          },
+          "deeplink" : {
+            "maxLength" : 512,
+            "type" : "string",
+            "example" : "biginvest://orders/784512"
+          },
+          "channels" : {
+            "minItems" : 1,
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ChannelEnum"
+            }
+          },
+          "category" : {
+            "$ref" : "#/components/schemas/NotificationCategoryEnum"
+          },
+          "isCritical" : {
+            "type" : "boolean",
+            "default" : false
+          },
+          "payload" : {
+            "type" : "object",
+            "additionalProperties" : true,
+            "description" : "Произвольный JSON payload"
+          }
+        },
+        "additionalProperties" : false
+      },
+      "SendNotificationAcceptedResponse" : {
+        "required" : [ "duplicate", "notificationId", "status" ],
+        "type" : "object",
+        "properties" : {
+          "notificationId" : {
+            "type" : "string",
+            "format" : "uuid",
+            "example" : "a2d1e86f-43f2-4d2f-a541-418fca4930b7"
+          },
+          "status" : {
+            "type" : "string",
+            "example" : "SENT",
+            "enum" : [ "SENT", "FAILED", "QUEUED_QUIET_HOURS" ]
+          },
+          "duplicate" : {
+            "type" : "boolean",
+            "example" : false
+          }
+        },
+        "additionalProperties" : false
+      },
+      "NotificationFeedItem" : {
+        "required" : [ "body", "category", "createdAt", "id", "status" ],
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "title" : {
+            "type" : "string",
+            "nullable" : true
+          },
+          "body" : {
+            "type" : "string"
+          },
+          "deeplink" : {
+            "type" : "string",
+            "nullable" : true
+          },
+          "category" : {
+            "$ref" : "#/components/schemas/NotificationCategoryEnum"
+          },
+          "status" : {
+            "$ref" : "#/components/schemas/NotificationStatusEnum"
+          },
+          "readAt" : {
+            "type" : "string",
+            "format" : "date-time",
+            "nullable" : true
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        },
+        "additionalProperties" : false
+      },
+      "Pagination" : {
+        "required" : [ "limit", "offset", "totalCount" ],
+        "type" : "object",
+        "properties" : {
+          "offset" : {
+            "minimum" : 0,
+            "type" : "integer",
+            "example" : 0
+          },
+          "limit" : {
+            "minimum" : 1,
+            "type" : "integer",
+            "example" : 20
+          },
+          "totalCount" : {
+            "minimum" : 0,
+            "type" : "integer",
+            "example" : 56
+          }
+        },
+        "additionalProperties" : false
+      },
+      "GetFeedResponse" : {
+        "required" : [ "notifications", "pagination" ],
+        "type" : "object",
+        "properties" : {
+          "notifications" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/NotificationFeedItem"
+            }
+          },
+          "pagination" : {
+            "$ref" : "#/components/schemas/Pagination"
+          }
+        },
+        "additionalProperties" : false
+      },
+      "GetUnreadCountResponse" : {
+        "required" : [ "unreadCount" ],
+        "type" : "object",
+        "properties" : {
+          "unreadCount" : {
+            "minimum" : 0,
+            "type" : "integer",
+            "example" : 12
+          }
+        },
+        "additionalProperties" : false
+      },
+      "MarkAsReadRequest" : {
+        "required" : [ "notificationId" ],
+        "type" : "object",
+        "properties" : {
+          "notificationId" : {
+            "type" : "string",
+            "format" : "uuid",
+            "example" : "a2d1e86f-43f2-4d2f-a541-418fca4930b7"
+          }
+        },
+        "additionalProperties" : false
+      },
+      "MarkAsReadResponse" : {
+        "required" : [ "notificationId", "readAt", "status" ],
+        "type" : "object",
+        "properties" : {
+          "notificationId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "READ" ]
+          },
+          "readAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        },
+        "additionalProperties" : false
+      },
+      "MarkAllAsReadResponse" : {
+        "required" : [ "updatedCount" ],
+        "type" : "object",
+        "properties" : {
+          "updatedCount" : {
+            "minimum" : 0,
+            "type" : "integer",
+            "example" : 12
+          }
+        },
+        "additionalProperties" : false
+      },
+      "NotificationPreferencesResponse" : {
+        "required" : [ "emailEnabled", "inAppEnabled", "marketingEnabled", "pushEnabled", "quietHoursFrom", "quietHoursTo", "smsEnabled", "systemEnabled", "telegramEnabled", "timezone", "transactionsEnabled", "whatsappEnabled" ],
+        "type" : "object",
+        "properties" : {
+          "pushEnabled" : {
+            "type" : "boolean",
+            "example" : true
+          },
+          "inAppEnabled" : {
+            "type" : "boolean",
+            "example" : true
+          },
+          "smsEnabled" : {
+            "type" : "boolean",
+            "example" : true
+          },
+          "emailEnabled" : {
+            "type" : "boolean",
+            "example" : true
+          },
+          "whatsappEnabled" : {
+            "type" : "boolean",
+            "example" : true
+          },
+          "telegramEnabled" : {
+            "type" : "boolean",
+            "example" : true
+          },
+          "marketingEnabled" : {
+            "type" : "boolean",
+            "example" : false
+          },
+          "transactionsEnabled" : {
+            "type" : "boolean",
+            "example" : true
+          },
+          "systemEnabled" : {
+            "type" : "boolean",
+            "example" : true
+          },
+          "quietHoursFrom" : {
+            "pattern" : "^([01]\\\\d|2[0-3]):[0-5]\\\\d$",
+            "type" : "string",
+            "example" : "22:00"
+          },
+          "quietHoursTo" : {
+            "pattern" : "^([01]\\\\d|2[0-3]):[0-5]\\\\d$",
+            "type" : "string",
+            "example" : "08:00"
+          },
+          "timezone" : {
+            "maxLength" : 64,
+            "type" : "string",
+            "example" : "Asia/Almaty"
+          }
+        },
+        "additionalProperties" : false
+      },
+      "SetNotificationPreferencesRequest" : {
+        "required" : [ "emailEnabled", "inAppEnabled", "marketingEnabled", "pushEnabled", "quietHoursFrom", "quietHoursTo", "smsEnabled", "systemEnabled", "telegramEnabled", "timezone", "transactionsEnabled", "whatsappEnabled" ],
+        "type" : "object",
+        "properties" : {
+          "pushEnabled" : {
+            "type" : "boolean"
+          },
+          "inAppEnabled" : {
+            "type" : "boolean"
+          },
+          "smsEnabled" : {
+            "type" : "boolean"
+          },
+          "emailEnabled" : {
+            "type" : "boolean"
+          },
+          "whatsappEnabled" : {
+            "type" : "boolean"
+          },
+          "telegramEnabled" : {
+            "type" : "boolean"
+          },
+          "marketingEnabled" : {
+            "type" : "boolean"
+          },
+          "transactionsEnabled" : {
+            "type" : "boolean"
+          },
+          "systemEnabled" : {
+            "type" : "boolean"
+          },
+          "quietHoursFrom" : {
+            "pattern" : "^([01]\\\\d|2[0-3]):[0-5]\\\\d$",
+            "type" : "string"
+          },
+          "quietHoursTo" : {
+            "pattern" : "^([01]\\\\d|2[0-3]):[0-5]\\\\d$",
+            "type" : "string"
+          },
+          "timezone" : {
+            "maxLength" : 64,
+            "type" : "string"
+          }
+        },
+        "additionalProperties" : false
+      },
+      "SimpleResultResponse" : {
+        "required" : [ "result" ],
+        "type" : "object",
+        "properties" : {
+          "result" : {
+            "type" : "string",
+            "example" : "OK",
+            "enum" : [ "OK" ]
+          }
+        },
+        "additionalProperties" : false
+      },
+      "ErrorDetail" : {
+        "required" : [ "field", "issue" ],
+        "type" : "object",
+        "properties" : {
+          "field" : {
+            "type" : "string",
+            "example" : "channels"
+          },
+          "issue" : {
+            "type" : "string",
+            "example" : "required"
+          }
+        },
+        "additionalProperties" : false
+      },
+      "ErrorObject" : {
+        "required" : [ "code", "message" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "example" : "VALIDATION_ERROR"
+          },
+          "message" : {
+            "type" : "string",
+            "example" : "Field 'channels' must contain at least one value."
+          },
+          "details" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ErrorDetail"
+            }
+          },
+          "requestId" : {
+            "type" : "string",
+            "example" : "d6d5f85f46b44e10"
+          }
+        },
+        "additionalProperties" : false
+      },
+      "ErrorResponse" : {
+        "required" : [ "error" ],
+        "type" : "object",
+        "properties" : {
+          "error" : {
+            "$ref" : "#/components/schemas/ErrorObject"
+          }
+        },
+        "additionalProperties" : false
+      }
+    },
+    "responses" : {
+      "BadRequest" : {
+        "description" : "Ошибка валидации данных",
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "$ref" : "#/components/schemas/ErrorResponse"
+            },
+            "example" : {
+              "error" : {
+                "code" : "VALIDATION_ERROR",
+                "message" : "Field 'channels' must contain at least one value.",
+                "details" : [ {
+                  "field" : "channels",
+                  "issue" : "required"
+                } ],
+                "requestId" : "d6d5f85f46b44e10"
+              }
+            }
+          }
+        }
+      },
+      "Unauthorized" : {
+        "description" : "Невалидная или отсутствующая авторизация",
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "$ref" : "#/components/schemas/ErrorResponse"
+            },
+            "example" : {
+              "error" : {
+                "code" : "UNAUTHORIZED",
+                "message" : "Invalid token.",
+                "requestId" : "a7f3f5d0913040f5"
+              }
+            }
+          }
+        }
+      },
+      "Forbidden" : {
+        "description" : "Недостаточно прав (ACL)",
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "$ref" : "#/components/schemas/ErrorResponse"
+            },
+            "example" : {
+              "error" : {
+                "code" : "FORBIDDEN",
+                "message" : "Access denied for this service.",
+                "requestId" : "7ac51f3e6cf1498f"
+              }
+            }
+          }
+        }
+      },
+      "NotFound" : {
+        "description" : "Сущность не найдена",
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "$ref" : "#/components/schemas/ErrorResponse"
+            },
+            "example" : {
+              "error" : {
+                "code" : "NOT_FOUND",
+                "message" : "Notification not found.",
+                "requestId" : "5f75f01010544f0b"
+              }
+            }
+          }
+        }
+      },
+      "TooManyRequests" : {
+        "description" : "Превышен лимит запросов",
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "$ref" : "#/components/schemas/ErrorResponse"
+            },
+            "example" : {
+              "error" : {
+                "code" : "TOO_MANY_REQUESTS",
+                "message" : "Rate limit exceeded.",
+                "requestId" : "eb0ece2afbb343f6"
+              }
+            }
+          }
+        }
+      },
+      "InternalError" : {
+        "description" : "Внутренняя ошибка сервиса",
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "$ref" : "#/components/schemas/ErrorResponse"
+            },
+            "example" : {
+              "error" : {
+                "code" : "INTERNAL_ERROR",
+                "message" : "Internal server error.",
+                "requestId" : "c37a78b702da4a7a"
+              }
+            }
+          }
+        }
+      },
+      "ProviderError" : {
+        "description" : "Ошибка внешнего провайдера",
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "$ref" : "#/components/schemas/ErrorResponse"
+            },
+            "example" : {
+              "error" : {
+                "code" : "PROVIDER_ERROR",
+                "message" : "Push provider is unavailable.",
+                "requestId" : "d44f84b2deca4102"
+              }
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes" : {
+      "bearerAuth" : {
+        "type" : "http",
+        "scheme" : "bearer",
+        "bearerFormat" : "JWT"
+      },
+      "apiKeyAuth" : {
+        "type" : "apiKey",
+        "name" : "x-api-key",
+        "in" : "header"
+      }
+    }
+  }
+}
