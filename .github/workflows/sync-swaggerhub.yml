@@ -1,0 +1,36 @@
+name: Sync OpenAPI from SwaggerHub
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 */6 * * *"
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download spec from SwaggerHub
+        run: |
+          curl -fsSL \
+            -H "Authorization: ${{ secrets.SWAGGERHUB_API_KEY }}" \
+            -H "Accept: application/yaml" \
+            "https://api.swaggerhub.com/apis/OSTANINBOB/RTS/1.0.0/swagger.yaml?resolved=true" \
+            -o openapi.yaml
+
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- openapi.yaml; then
+            echo "No changes"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add openapi.yaml
+          git commit -m "chore: sync OpenAPI from SwaggerHub"
+          git push
